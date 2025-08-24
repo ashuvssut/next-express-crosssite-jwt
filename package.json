@@ -1,0 +1,21 @@
+{
+  "name": "cookie-playground-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "This repo demonstrates a secure authentication setup with a Next.js frontend and an 'cross-origin' Express backend. It’s designed as a playground for experimenting with cookies, JWT/session strategies, and real-world security practices.",
+  "main": "index.js",
+  "author": "Ashutosh Khanduala @ashuvssut",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -c \"cyan,magenta\" -n \"EXPRESS,NEXTJS\" \"yarn workspace backend dev\" \"yarn workspace frontend dev\"",
+    "build": "yarn workspace backend build && yarn workspace frontend build",
+    "lint": "yarn workspaces run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
