@@ -21,7 +21,7 @@ import morgan from "morgan";
 const app = express();
 
 // ====== MIDDLEWARE ======
-app.set("trust proxy", 1);
+app.set("trust proxy", 1); // We use Next.js API rewrites to proxy requests
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 app.use(cookieParser());
