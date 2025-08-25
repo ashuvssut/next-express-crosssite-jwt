@@ -1,3 +1,4 @@
+import type { Response, Request, NextFunction } from "express";
 import {
   COOKIE_SAMESITE_POLICY,
   CSRF_COOKIE_KEY,
@@ -10,7 +11,7 @@ import {
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-export function issueCsrf(res) {
+export function issueCsrf(res: Response): string | null {
   if (!CSRF_REQUIRED) return null;
 
   const csrf = crypto.randomBytes(32).toString("hex");
@@ -56,7 +57,7 @@ export function issueCsrf(res) {
   return csrf;
 }
 
-export function requireCsrf(req, res, next) {
+export function requireCsrf(req: Request, res: Response, next: NextFunction) {
   if (!CSRF_REQUIRED) return next();
   if (!/^(POST|PUT|PATCH|DELETE)$/i.test(req.method)) return next();
 
@@ -68,7 +69,7 @@ export function requireCsrf(req, res, next) {
   next();
 }
 
-export const issueJwtCookie = (res, token) => {
+export const issueJwtCookie = (res: Response, token: string) => {
   res.cookie(AUTH_COOKIE_KEY, token, {
     httpOnly: true, // Not accessible by the browser JS
     secure: IS_PROD, // only sent over HTTPS
@@ -87,7 +88,7 @@ export const issueJwtCookie = (res, token) => {
   });
 };
 
-export function isAuth(req, res, next) {
+export function isAuth(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies[AUTH_COOKIE_KEY];
   if (!token) {
     return res.status(401).json({
@@ -97,7 +98,10 @@ export function isAuth(req, res, next) {
   }
 
   try {
-    req.auth = jwt.verify(token, JWT_SECRET);
+    req.auth = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      role: string;
+    };
     next();
   } catch {
     return res.status(401).json({
@@ -107,8 +111,8 @@ export function isAuth(req, res, next) {
   }
 }
 
-export function hasRole(role) {
-  return (req, res, next) => {
+export function hasRole(role: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.auth) {
       return res.status(401).json({ message: "Unauthorized access" });
     }
@@ -119,4 +123,12 @@ export function hasRole(role) {
     }
     next();
   };
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      auth?: { userId: string; role: string };
+    }
+  }
 }

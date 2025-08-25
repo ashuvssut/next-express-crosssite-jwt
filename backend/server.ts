@@ -3,7 +3,6 @@ import "dotenv/config";
 import fs from "fs";
 import https from "https";
 import app from "./app.js";
-
 import { API_URL, COOKIE_SAMESITE_POLICY } from "./config.js";
 
 const key = fs.readFileSync("./certs/backend-key.pem");
@@ -12,9 +11,13 @@ const cert = fs.readFileSync("./certs/backend-cert.pem");
 const server = https.createServer({ key, cert }, app);
 
 const { port, hostname } = new URL(API_URL);
+const serverPort = parseInt(port, 10);
+if (isNaN(serverPort)) {
+  throw new Error(`Invalid port: ${port}`);
+}
 
-server.listen(port, hostname, () => {
-  console.log(`🚀 Express API running at ${API_URL}`);
+server.listen(serverPort, hostname, () => {
+  console.log(`\n\n🚀 Express API running at ${API_URL}`);
   console.log(`   - SameSite Policy: ${sameSitePolicyMessage()}\n`);
 });
 

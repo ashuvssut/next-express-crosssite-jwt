@@ -1,4 +1,4 @@
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
@@ -118,11 +118,12 @@ app.use((req, res) => {
 });
 
 // ====== ERROR HANDLER ======
-app.use((err, req, res) => {
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Server error:", err);
   res
     .status(500)
     .json({ message: "An unexpected error occurred. Please try again" });
-});
+};
+app.use(errorHandler);
 
 export default app;
