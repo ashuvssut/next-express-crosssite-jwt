@@ -1,4 +1,4 @@
-# Next.js + Express Cookie/JWT Playground
+# Next.js + Express JWT-based Cookie Playground
 
 This repo demonstrates **JWT-based auth using cookies** with a Next.js frontend and Express backend hosted on different origins. It demonstates usage of Next.js API rewrites to make the client requests same-origin. It’s a playground for experimenting with **secure cookie storage, CSRF protection, and auth middleware**.
 

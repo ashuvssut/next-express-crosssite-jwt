@@ -5,7 +5,13 @@ import helmet from "helmet";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import jwt from "jsonwebtoken";
-import { requireCsrf, issueCsrf, isAuth, hasRole } from "./helpers.js";
+import {
+  requireCsrf,
+  issueCsrf,
+  isAuth,
+  hasRole,
+  issueJwtCookie,
+} from "./helpers.js";
 import {
   APP_URL,
   AUTH_COOKIE_KEY,
@@ -26,6 +32,15 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
+/**
+ * CORS configuration:
+ * - Allows ONLY our frontend (`APP_URL`) to make cross-origin requests.
+ * - `credentials: true` ensures cookies (JWT + CSRF) are sent automatically on allowed origins (i.e. `APP_URL`).
+ * - This does NOT bypass CSRF protections: cross-site origins cannot read our cookies or send `x-csrf-token`
+ *   because of our `sameSite` + `httpOnly` settings on cookies, so double-submit CSRF remains effective.
+ */
+app.use(cors({ origin: APP_URL, credentials: true }));
+
 app.use(cors({ origin: APP_URL, credentials: true }));
 app.use(rateLimit({ windowMs: 60_000, max: 120 }));
 app.use((req, res, next) => {
@@ -47,14 +62,7 @@ app.post("/login", (req, res) => {
   const token = jwt.sign({ userId, role }, JWT_SECRET, {
     expiresIn: JWT_EXP_MS / 1000,
   });
-
-  res.cookie(AUTH_COOKIE_KEY, token, {
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: COOKIE_SAMESITE_POLICY,
-    maxAge: JWT_EXP_MS,
-    path: "/",
-  });
+  issueJwtCookie(res, token);
 
   const csrf = issueCsrf(res);
   console.log("CSRF token cookie issued:", csrf);
@@ -69,7 +77,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", isAuth, (req, res) => {
   res.clearCookie(AUTH_COOKIE_KEY, {
-    httpOnly: true,
+    httpOnly: true, // only accessible by the server
     secure: IS_PROD,
     sameSite: COOKIE_SAMESITE_POLICY,
     path: "/",
