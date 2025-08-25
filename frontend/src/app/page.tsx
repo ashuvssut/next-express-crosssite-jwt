@@ -93,7 +93,8 @@ export default function PlaygroundPage() {
               /admin
             </button>
             <p className="text-xs text-gray-400">
-              Admin-only endpoint. Only accessible if logged in as role &quot;admin&quot;.
+              Admin-only endpoint. Only accessible if logged in as role
+              &quot;admin&quot;.
             </p>
           </div>
         </div>
@@ -101,18 +102,18 @@ export default function PlaygroundPage() {
 
       {/* Logs Section */}
       <div className="space-y-2">
-        <h2 className="font-semibold">Logs / Responses</h2>
+        <h2 className="font-semibold">Success Responses</h2>
         <p className="text-sm text-gray-500">
           Displays the latest response for each query or mutation.
         </p>
         <pre className="bg-gray-800 text-white p-4 rounded max-h-[400px] overflow-auto">
           {JSON.stringify(
             {
-              login: loginMutation.data,
-              logout: logoutMutation.data,
-              me: meQuery.data,
-              public: publicQuery.data,
-              admin: adminQuery.data,
+              "/login": loginMutation.data,
+              "/logout": logoutMutation.data,
+              "/me": meQuery.data,
+              "/public": publicQuery.data,
+              "/admin": adminQuery.data,
             },
             null,
             2

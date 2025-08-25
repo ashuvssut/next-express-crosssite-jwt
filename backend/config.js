@@ -11,6 +11,7 @@ export const CSRF_COOKIE_KEY = "csrfToken";
 
 export const JWT_EXP_MS = 1000 * 60 * 60; // 1h
 export const JWT_SECRET = process.env.JWT_SECRET;
-export const COOKIE_SAMESITE = process.env.COOKIE_SAMESITE || "strict";
 
-export const CSRF_REQUIRED = COOKIE_SAMESITE !== "strict";
+// export const COOKIE_SAMESITE_POLICY = "strict";
+export const COOKIE_SAMESITE_POLICY = "lax";
+export const CSRF_REQUIRED = COOKIE_SAMESITE_POLICY !== "strict";
