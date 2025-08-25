@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:4000/:path*", // proxy to backend
+        destination: `${API_URL}/:path*`, // proxy to express backend
       },
     ];
   },

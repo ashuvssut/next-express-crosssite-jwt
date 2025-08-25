@@ -4,8 +4,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
+    "setup-https": "dotenv -e .env -- sh ./setup-https.sh",
+    "dev:https": "sudo nodemon server.js",
     "lint": "eslint . --ext .js"
   },
   "author": "Ashutosh Khanduala @ashuvssut",
@@ -17,12 +17,14 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.0.1",
     "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "dotenv": "^17.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
     "eslint": "^9.34.0",
     "globals": "^16.3.0",
-    "nodemon": "^3.0.10"
+    "nodemon": "^3.1.10"
   }
 }

@@ -1,104 +1,16 @@
-import express from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import helmet from "helmet";
-import compression from "compression";
-import rateLimit from "express-rate-limit";
-import jwt from "jsonwebtoken";
-import { requireCsrf, issueCsrf } from "./csrf.js";
-import {
-  APP_ORIGIN,
-  COOKIE_NAME,
-  COOKIE_SAMESITE,
-  CSRF_COOKIE,
-  CSRF_REQUIRED,
-  IS_PROD,
-  JWT_EXP_MS,
-  JWT_SECRET,
-} from "./config.js";
+import "dotenv/config";
 
-const app = express();
+import fs from "fs";
+import https from "https";
+import app from "./app.js";
+import { API_URL } from "./config.js";
 
-app.set("trust proxy", 1);
+const key = fs.readFileSync("./certs/backend-key.pem");
+const cert = fs.readFileSync("./certs/backend-cert.pem");
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(compression());
-app.use(cookieParser());
-app.use(express.json());
-app.use(cors({ origin: APP_ORIGIN, credentials: true }));
-app.use(rateLimit({ windowMs: 60_000, max: 120 }));
+const server = https.createServer({ key, cert }, app);
 
-app.use(requireCsrf);
-
-// ====== AUTH ======
-function isAuth(req, res, next) {
-  const token = req.cookies[COOKIE_NAME];
-  if (!token) return res.status(401).json({ loggedIn: false });
-
-  try {
-    req.auth = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ loggedIn: false, reason: "invalid/expired" });
-  }
-}
-
-function hasRole(role) {
-  return (req, res, next) => {
-    if (!req.auth) return res.status(401).json({ error: "Unauthorized" });
-    if (req.auth.role !== role)
-      return res.status(403).json({ error: "Forbidden" });
-    next();
-  };
-}
-
-// ====== ROUTES ======
-app.post("/login", (req, res) => {
-  const userId = "u_123";
-  const role = req.body?.role === "admin" ? "admin" : "user";
-
-  const token = jwt.sign({ userId, role }, JWT_SECRET, {
-    expiresIn: JWT_EXP_MS / 1000,
-  });
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: COOKIE_SAMESITE,
-    maxAge: JWT_EXP_MS,
-    path: "/",
-  });
-
-  const csrf = issueCsrf(res);
-  res.json({ success: true, userId, role, csrf });
+const { port, hostname } = new URL(API_URL);
+server.listen(port, hostname, () => {
+  console.log(`🚀 Express API running at ${API_URL}\n`);
 });
-
-app.post("/logout", isAuth, (req, res) => {
-  res.clearCookie(COOKIE_NAME, {
-    httpOnly: true,
-    secure: IS_PROD,
-    sameSite: COOKIE_SAMESITE,
-    path: "/",
-  });
-  if (CSRF_REQUIRED) {
-    res.clearCookie(CSRF_COOKIE, {
-      httpOnly: false,
-      secure: IS_PROD,
-      sameSite: COOKIE_SAMESITE,
-      maxAge: JWT_EXP_MS,
-      path: "/",
-    });
-  }
-  res.json({ success: true, message: "Logged out" });
-});
-
-app.get("/public", (req, res) => res.json({ public: true }));
-app.get("/me", isAuth, (req, res) => res.json({ loggedIn: true, ...req.auth }));
-app.get("/admin", isAuth, hasRole("admin"), (req, res) =>
-  res.json({ admin: true, message: "Welcome, admin!" })
-);
-
-app.listen(4000, () =>
-  console.log(
-    `Server running on http://localhost:4000 (SameSite=${COOKIE_SAMESITE})`
-  )
-);

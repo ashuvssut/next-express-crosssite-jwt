@@ -6,7 +6,7 @@ export const useLoginMutation = (role: "user" | "admin") =>
   useMutation({
     mutationKey: ["login", role],
     mutationFn: async () => {
-      const res = await axiosClient.post("/login", { role });
+      const res = await axiosClient.post("/api/login", { role });
       return res.data;
     },
   });
@@ -15,7 +15,7 @@ export const useLogoutMutation = () =>
   useMutation({
     mutationKey: ["logout"],
     mutationFn: async () => {
-      const res = await axiosClient.post("/logout");
+      const res = await axiosClient.post("/api/logout");
       return res.data;
     },
   });
@@ -25,7 +25,7 @@ export const useMeQuery = () =>
   useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const res = await axiosClient.get("/me");
+      const res = await axiosClient.get("/api/me");
       return res.data;
     },
     enabled: false,
@@ -35,7 +35,7 @@ export const usePublicQuery = () =>
   useQuery({
     queryKey: ["public"],
     queryFn: async () => {
-      const res = await axiosClient.get("/public");
+      const res = await axiosClient.get("/api/public");
       return res.data;
     },
     enabled: false,
@@ -45,7 +45,7 @@ export const useAdminQuery = () =>
   useQuery({
     queryKey: ["admin"],
     queryFn: async () => {
-      const res = await axiosClient.get("/admin");
+      const res = await axiosClient.get("/api/admin");
       return res.data;
     },
     enabled: false,

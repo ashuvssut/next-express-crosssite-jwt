@@ -11,7 +11,8 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "concurrently -c \"cyan,magenta\" -n \"EXPRESS,NEXTJS\" \"yarn workspace backend dev\" \"yarn workspace frontend dev\"",
+    "setup-https": "yarn workspace backend setup-https",
+    "dev:https": "sudo concurrently -c \"green,magenta\" -n \"EXPRESS,NEXTJS\" \"yarn workspace backend dev:https\" \"yarn workspace frontend dev:https\"",
     "build": "yarn workspace backend build && yarn workspace frontend build",
     "lint": "yarn workspaces run lint"
   },
